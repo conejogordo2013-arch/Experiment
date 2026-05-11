@@ -21,5 +21,9 @@ void jcl_mac64(const uint8_t key[JCL_KEY_LEN], const uint8_t *data,
 void jcl_derive_response(const uint8_t key[JCL_KEY_LEN], const uint8_t *rand,
                          size_t rand_len, uint8_t sres[JCL_MAC_LEN],
                          uint8_t session_key[JCL_KEY_LEN]);
+void jcl_expand_hash(const uint8_t *a, size_t a_len, const uint8_t *b,
+                     size_t b_len, const uint8_t *c, size_t c_len,
+                     const uint8_t *label, size_t label_len, uint8_t *out,
+                     size_t out_len);
 
 #endif

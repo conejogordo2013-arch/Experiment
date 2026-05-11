@@ -70,3 +70,52 @@ void jcl_derive_response(const uint8_t key[JCL_KEY_LEN], const uint8_t *rand,
     uint8_t zero[JCL_KEY_LEN] = {0};
     jcl_stream_xor(key, sres, JCL_MAC_LEN, zero, session_key, JCL_KEY_LEN);
 }
+
+void jcl_expand_hash(const uint8_t *a, size_t a_len, const uint8_t *b,
+                     size_t b_len, const uint8_t *c, size_t c_len,
+                     const uint8_t *label, size_t label_len, uint8_t *out,
+                     size_t out_len) {
+    uint8_t key[JCL_KEY_LEN] = {
+        0x4a, 0x43, 0x49, 0x2d, 0x48, 0x41, 0x53, 0x48,
+        0x2d, 0x41, 0x4c, 0x50, 0x48, 0x41, 0x21, 0x01,
+    };
+    uint8_t block[JCL_MAC_LEN];
+    uint8_t buf[96];
+    size_t written = 0;
+    uint8_t counter = 0;
+
+    for (size_t i = 0; i < a_len; ++i) {
+        key[i % JCL_KEY_LEN] ^= a[i];
+        key[(i * 5U) % JCL_KEY_LEN] = (uint8_t)(key[(i * 5U) % JCL_KEY_LEN] + a[i]);
+    }
+    for (size_t i = 0; i < b_len; ++i) {
+        key[(i + 3U) % JCL_KEY_LEN] ^= (uint8_t)(b[i] + (uint8_t)i);
+    }
+    for (size_t i = 0; i < c_len; ++i) {
+        key[(i + 9U) % JCL_KEY_LEN] = (uint8_t)(key[(i + 9U) % JCL_KEY_LEN] + c[i]);
+    }
+
+    while (written < out_len) {
+        size_t len = 0;
+        buf[len++] = counter++;
+        for (size_t i = 0; i < label_len && len < sizeof(buf); ++i) {
+            buf[len++] = label[i];
+        }
+        for (size_t i = 0; i < a_len && len < sizeof(buf); ++i) {
+            buf[len++] = a[i];
+        }
+        for (size_t i = 0; i < b_len && len < sizeof(buf); ++i) {
+            buf[len++] = b[i];
+        }
+        for (size_t i = 0; i < c_len && len < sizeof(buf); ++i) {
+            buf[len++] = c[i];
+        }
+        jcl_mac64(key, buf, len, block);
+        for (size_t i = 0; i < sizeof(block) && written < out_len; ++i) {
+            out[written++] = block[i];
+        }
+        for (size_t i = 0; i < JCL_KEY_LEN; ++i) {
+            key[i] ^= block[i % sizeof(block)] ^ counter;
+        }
+    }
+}
