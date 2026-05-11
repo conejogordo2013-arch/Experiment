@@ -123,6 +123,8 @@ Además de APDUs hexadecimales, la CLI acepta comandos de laboratorio con el pre
 | `JCI:JNS0000000000000000` | Verifica el PIN JCI por defecto y habilita lecturas protegidas |
 | `JCI:JUL00000000000000000000000000000000` | Verifica PUK JCI por defecto y desbloquea estado `LOCKED` |
 | `JCI:SEND<data>` | Aplica canal seguro toy `JV6` usando `JCx` si la tarjeta está `ACTIVE` |
+| `JCI:NETTAP:JCCS` | Simula interceptación de red intentando capturar `JCCS`; no revela la clave y activa `JC_BRICKED` |
+| `JCI:EXFIL:JCCS` | Alias de prueba para el mismo evento destructivo de exfiltración de `JCCS` |
 
 ## Seguridad y límites
 
@@ -133,8 +135,10 @@ y `jcl_stream_xor`) solo sirve para observar flujo de datos: RAND → SRES → c
 de sesión simulada.
 
 La CPU, ROM, EEPROM, RAM y bus son modelos de laboratorio para entender capas,
-no una reproducción de silicio real. Si quieres extender el estándar Alpha,
-hazlo en un entorno aislado y mantén el alcance en datos sintéticos.
+no una reproducción de silicio real. La prueba `JCI:NETTAP:JCCS` existe solo para
+simular un detector defensivo: nunca devuelve `JCCS`; borra el core lógico y deja
+la tarjeta en `JC_BRICKED`. Si quieres extender el estándar Alpha, hazlo en un
+entorno aislado y mantén el alcance en datos sintéticos.
 
 ## Probar
 

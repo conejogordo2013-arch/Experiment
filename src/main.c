@@ -28,6 +28,7 @@ static void print_help(const char *program) {
     printf("  JCI:JCR / JCI:JCID / JCI:JCC identity records\n");
     printf("  JCI:JNS<16 digits>         verify JuanCarlosLegals PIN\n");
     printf("  JCI:SEND<data>             secure-channel toy transform after AUTH2\n");
+    printf("  JCI:NETTAP:JCCS            simulate network interception; bricks card\n");
 }
 
 static int parse_command(const char *text, jcl_apdu_t *apdu) {

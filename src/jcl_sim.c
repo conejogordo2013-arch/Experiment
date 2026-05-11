@@ -595,6 +595,14 @@ static jcl_response_t jci_process(jcl_sim_t *sim, const jcl_apdu_t *apdu) {
         derive3(sim->jci_ram.jcx, sizeof(sim->jci_ram.jcx), apdu->data + cmd_len,
                 len, NULL, 0, "JV6", response.data, len);
         response.len = len;
+    } else if (data_starts(apdu, "NETTAP:JCCS") || data_starts(apdu, "EXFIL:JCCS")) {
+        /*
+         * Simulated network interception/tamper event: the fictitious standard treats any
+         * attempt to catch or exfiltrate the root JCCS as destructive. Never return JCCS.
+         */
+        memcpy(response.data, "TAMPER_JCCS_BRICK", 17);
+        response.len = 17;
+        jci_brick(sim);
     } else if (data_starts(apdu, "JNS")) {
         const size_t cmd_len = 3;
         size_t len = apdu->lc > cmd_len ? apdu->lc - cmd_len : 0;
